@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rainbot Checker</title>
+    <title>User Details Checker</title>
     <style>
         body {
             background-color: #000;
@@ -49,8 +49,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Rainbot Checker</h2>
-        <input type="text" id="userNameInput" placeholder="Nombre de Usuario"><br>
+        <h2>User Details Checker</h2>
         <input type="password" id="accessTokenInput" placeholder="API Key"><br>
         <button id="submitButton">Enviar</button>
         <div id="result" style="margin-top: 20px;"></div>
@@ -59,12 +58,11 @@
     <script>
         document.getElementById('submitButton').addEventListener('click', function() {
             const accessToken = document.getElementById('accessTokenInput').value;
-            const userName = document.getElementById('userNameInput').value;
 
-            fetchUserName(accessToken, userName);
+            fetchUserName(accessToken);
         });
 
-        function fetchUserName(accessToken, userName) {
+        function fetchUserName(accessToken) {
             fetch('https://stake.com/_api/graphql', {
                 method: 'POST',
                 headers: {
@@ -72,11 +70,8 @@
                     'x-access-token': accessToken
                 },
                 body: JSON.stringify({
-                    "query": "query UserDetails($name: String!) {\n  user(name: $name) {\n    ...UserTags\n    createdAt\n    statisticScoped {\n      bets\n      wins\n      losses\n      ties\n      betAmount\n      currency\n      scope\n      betValue\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment UserTags on User {\n  id\n  name\n  isMuted\n  isRainproof\n  isIgnored\n  isHighroller\n  isSportHighroller\n  leaderboardDailyProfitRank\n  leaderboardDailyWageredRank\n  leaderboardWeeklyProfitRank\n  leaderboardWeeklyWageredRank\n  flags {\n    flag\n    rank\n    createdAt\n    __typename\n  }\n  roles {\n    name\n    expireAt\n    message\n    __typename\n  }\n  createdAt\n  preferenceHideBets\n  __typename\n}\n",
-                    "operationName": "UserDetails",
-                    "variables": {
-                        "name": userName
-                    }
+                    "query": "query UserDetails {\n  user {\n    ...UserTags\n    createdAt\n    statisticScoped {\n      bets\n      wins\n      losses\n      ties\n      betAmount\n      currency\n      scope\n      betValue\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment UserTags on User {\n  id\n  name\n  isMuted\n  isRainproof\n  isIgnored\n  isHighroller\n  isSportHighroller\n  leaderboardDailyProfitRank\n  leaderboardDailyWageredRank\n  leaderboardWeeklyProfitRank\n  leaderboardWeeklyWageredRank\n  flags {\n    flag\n    rank\n    createdAt\n    __typename\n  }\n  roles {\n    name\n    expireAt\n    message\n    __typename\n  }\n  createdAt\n  preferenceHideBets\n  __typename\n}\n",
+                    "operationName": "UserDetails"
                 })
             })
             .then(response => response.json())
@@ -92,13 +87,13 @@
 
             for (let i = 0; i < roles.length; i++) {
                 if (roles[i].name === "rainAbuser") {
-                    rainAbuserInfo = Rol: RainAbuser\nFecha de Expiración: ${roles[i].expireAt};
+                    rainAbuserInfo = `Rol: RainAbuser\nFecha de Expiración: ${roles[i].expireAt}`;
                     break;
                 }
             }
 
             const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = <pre>Nombre de Usuario: ${data.data.user.name}\n${rainAbuserInfo}</pre>;
+            resultDiv.innerHTML = `<pre>Nombre de Usuario: ${data.data.user.name}\n${rainAbuserInfo}</pre>`;
         }
     </script>
 </body>
