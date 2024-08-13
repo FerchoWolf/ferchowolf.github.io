@@ -24,7 +24,7 @@
             color: white;
             border: 1px solid #ccc;
         }
-        input[type="password"] {
+        input[type="text"], input[type="password"] {
             margin-top: 10px;
             padding: 5px;
             border-radius: 3px;
@@ -50,6 +50,7 @@
 <body>
     <div class="container">
         <h2>Rainbot Checker</h2>
+        <input type="text" id="userNameInput" placeholder="Nombre de Usuario"><br>
         <input type="password" id="accessTokenInput" placeholder="API Key"><br>
         <button id="submitButton">Enviar</button>
         <div id="result" style="margin-top: 20px;"></div>
@@ -58,9 +59,7 @@
     <script>
         document.getElementById('submitButton').addEventListener('click', function() {
             const accessToken = document.getElementById('accessTokenInput').value;
-
-            // Establece aquí el nombre del usuario manualmente
-            const userName = "nombre_del_usuario"; // Reemplaza esto con el nombre de usuario deseado
+            const userName = document.getElementById('userNameInput').value;
 
             fetchUserName(accessToken, userName);
         });
@@ -93,13 +92,13 @@
 
             for (let i = 0; i < roles.length; i++) {
                 if (roles[i].name === "rainAbuser") {
-                    rainAbuserInfo = `Rol: RainAbuser\nFecha de Expiración: ${roles[i].expireAt}`;
+                    rainAbuserInfo = Rol: RainAbuser\nFecha de Expiración: ${roles[i].expireAt};
                     break;
                 }
             }
 
             const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `<pre>Nombre de Usuario: ${data.data.user.name}\n${rainAbuserInfo}</pre>`;
+            resultDiv.innerHTML = <pre>Nombre de Usuario: ${data.data.user.name}\n${rainAbuserInfo}</pre>;
         }
     </script>
 </body>
