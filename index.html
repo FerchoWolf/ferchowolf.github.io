@@ -24,7 +24,7 @@
             color: white;
             border: 1px solid #ccc;
         }
-        input[type="text"], input[type="password"] {
+        input[type="password"] {
             margin-top: 10px;
             padding: 5px;
             border-radius: 3px;
@@ -50,7 +50,6 @@
 <body>
     <div class="container">
         <h2>Rainbot Checker</h2>
-        <input type="text" id="userNameInput" placeholder="Nombre de Usuario"><br>
         <input type="password" id="accessTokenInput" placeholder="API Key"><br>
         <button id="submitButton">Enviar</button>
         <div id="result" style="margin-top: 20px;"></div>
@@ -59,7 +58,9 @@
     <script>
         document.getElementById('submitButton').addEventListener('click', function() {
             const accessToken = document.getElementById('accessTokenInput').value;
-            const userName = document.getElementById('userNameInput').value;
+
+            // Establece aquí el nombre del usuario manualmente
+            const userName = "nombre_del_usuario"; // Reemplaza esto con el nombre de usuario deseado
 
             fetchUserName(accessToken, userName);
         });
