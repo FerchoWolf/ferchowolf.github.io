@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,9 +49,9 @@
 </head>
 <body>
     <div class="container">
-        <h2>Rainbot Ban Checker</h2>
+        <h2>RainBot Ban Checker</h2>
         <input type="password" id="accessTokenInput" placeholder="API Key"><br>
-        <button id="submitButton">Enviar</button>
+        <button id="submitButton">Submit</button>
         <div id="result" style="margin-top: 20px;"></div>
     </div>
 
@@ -63,49 +63,49 @@
         });
 
         function fetchUserName(accessToken) {
-    fetch('https://stake.com/_api/graphql', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-access-token': accessToken
-        },
-        body: JSON.stringify({
-            "query": "query UserDetails {\n  user {\n    ...UserTags\n    createdAt\n    statisticScoped {\n      bets\n      wins\n      losses\n      ties\n      betAmount\n      currency\n      scope\n      betValue\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment UserTags on User {\n  id\n  name\n  isMuted\n  isRainproof\n  isIgnored\n  isHighroller\n  isSportHighroller\n  leaderboardDailyProfitRank\n  leaderboardDailyWageredRank\n  leaderboardWeeklyProfitRank\n  leaderboardWeeklyWageredRank\n  flags {\n    flag\n    rank\n    createdAt\n    __typename\n  }\n  roles {\n    name\n    expireAt\n    message\n    __typename\n  }\n  createdAt\n  preferenceHideBets\n  __typename\n}\n",
-            "operationName": "UserDetails"
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            fetch('https://stake.com/_api/graphql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-token': accessToken
+                },
+                body: JSON.stringify({
+                    "query": "query UserDetails {\n  user {\n    ...UserTags\n    createdAt\n    statisticScoped {\n      bets\n      wins\n      losses\n      ties\n      betAmount\n      currency\n      scope\n      betValue\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment UserTags on User {\n  id\n  name\n  isMuted\n  isRainproof\n  isIgnored\n  isHighroller\n  isSportHighroller\n  leaderboardDailyProfitRank\n  leaderboardDailyWageredRank\n  leaderboardWeeklyProfitRank\n  leaderboardWeeklyWageredRank\n  flags {\n    flag\n    rank\n    createdAt\n    __typename\n  }\n  roles {\n    name\n    expireAt\n    message\n    __typename\n  }\n  createdAt\n  preferenceHideBets\n  __typename\n}\n",
+                    "operationName": "UserDetails"
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data.data || !data.data.user) {
+                    throw new Error("Could not retrieve user information.");
+                }
+                displayUserName(data);
+            })
+            .catch(error => {
+                console.error('Error fetching user details:', error);
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `<pre>Error: ${error.message}</pre>`;
+            });
         }
-        return response.json();
-    })
-    .then(data => {
-        if (!data.data || !data.data.user) {
-            throw new Error("No se pudo obtener la información del usuario.");
-        }
-        displayUserName(data);
-    })
-    .catch(error => {
-        console.error('Error fetching user details:', error);
-        const resultDiv = document.getElementById('result');
-        resultDiv.innerHTML = `<pre>Error: ${error.message}</pre>`;
-    });
-}
 
         function displayUserName(data) {
-            let rainAbuserInfo = "No está baneada de lluvias";
+            let rainAbuserInfo = "User is not banned from rain.";
             const roles = data.data.user.roles;
 
             for (let i = 0; i < roles.length; i++) {
                 if (roles[i].name === "rainAbuser") {
-                    rainAbuserInfo = `Rol: RainAbuser\nFecha de Expiración: ${roles[i].expireAt}`;
+                    rainAbuserInfo = `Role: RainAbuser\nExpiration Date: ${roles[i].expireAt}`;
                     break;
                 }
             }
 
             const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `<pre>Nombre de Usuario: ${data.data.user.name}\n${rainAbuserInfo}</pre>`;
+            resultDiv.innerHTML = `<pre>Username: ${data.data.user.name}\n${rainAbuserInfo}</pre>`;
         }
     </script>
 </body>
