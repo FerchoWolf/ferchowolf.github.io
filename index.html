@@ -63,23 +63,35 @@
         });
 
         function fetchUserName(accessToken) {
-            fetch('https://stake.com/_api/graphql', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-access-token': accessToken
-                },
-                body: JSON.stringify({
-                    "query": "query UserDetails {\n  user {\n    ...UserTags\n    createdAt\n    statisticScoped {\n      bets\n      wins\n      losses\n      ties\n      betAmount\n      currency\n      scope\n      betValue\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment UserTags on User {\n  id\n  name\n  isMuted\n  isRainproof\n  isIgnored\n  isHighroller\n  isSportHighroller\n  leaderboardDailyProfitRank\n  leaderboardDailyWageredRank\n  leaderboardWeeklyProfitRank\n  leaderboardWeeklyWageredRank\n  flags {\n    flag\n    rank\n    createdAt\n    __typename\n  }\n  roles {\n    name\n    expireAt\n    message\n    __typename\n  }\n  createdAt\n  preferenceHideBets\n  __typename\n}\n",
-                    "operationName": "UserDetails"
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                displayUserName(data);
-            })
-            .catch(error => console.error('Error fetching user details:', error));
+    fetch('https://stake.com/_api/graphql', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': accessToken
+        },
+        body: JSON.stringify({
+            "query": "query UserDetails {\n  user {\n    ...UserTags\n    createdAt\n    statisticScoped {\n      bets\n      wins\n      losses\n      ties\n      betAmount\n      currency\n      scope\n      betValue\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment UserTags on User {\n  id\n  name\n  isMuted\n  isRainproof\n  isIgnored\n  isHighroller\n  isSportHighroller\n  leaderboardDailyProfitRank\n  leaderboardDailyWageredRank\n  leaderboardWeeklyProfitRank\n  leaderboardWeeklyWageredRank\n  flags {\n    flag\n    rank\n    createdAt\n    __typename\n  }\n  roles {\n    name\n    expireAt\n    message\n    __typename\n  }\n  createdAt\n  preferenceHideBets\n  __typename\n}\n",
+            "operationName": "UserDetails"
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        return response.json();
+    })
+    .then(data => {
+        if (!data.data || !data.data.user) {
+            throw new Error("No se pudo obtener la información del usuario.");
+        }
+        displayUserName(data);
+    })
+    .catch(error => {
+        console.error('Error fetching user details:', error);
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `<pre>Error: ${error.message}</pre>`;
+    });
+}
 
         function displayUserName(data) {
             let rainAbuserInfo = "No está baneada de lluvias";
