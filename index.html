@@ -24,7 +24,7 @@
             color: white;
             border: 1px solid #ccc;
         }
-        input[type="text"], input[type="password"] {
+        select, input[type="password"] {
             margin-top: 10px;
             padding: 5px;
             border-radius: 3px;
@@ -50,6 +50,22 @@
 <body>
     <div class="container">
         <h2>RainBot Ban Checker</h2>
+        <select id="domainSelect">
+            <option value="stake.com">Stake.com</option>
+            <option value="stake.ac">Stake.ac</option>
+            <option value="stake.games">Stake.games</option>
+            <option value="stake.bet">Stake.bet</option>
+            <option value="stake.pet">Stake.pet</option>
+            <option value="stake1001.com">Stake1001.com</option>
+            <option value="stake1002.com">Stake1002.com</option>
+            <option value="stake1003.com">Stake1003.com</option>
+            <option value="stake.mba">Stake.mba</option>
+            <option value="stake.jp">Stake.jp</option>
+            <option value="stake.bz">Stake.bz</option>
+            <option value="staketr.com">Staketr.com</option>
+            <option value="stake.ceo">Stake.ceo</option>
+            <option value="stake.krd">Stake.krd</option>
+        </select><br>
         <input type="password" id="accessTokenInput" placeholder="API Key"><br>
         <button id="submitButton">Submit</button>
         <div id="result" style="margin-top: 20px;"></div>
@@ -57,55 +73,79 @@
 
     <script>
         document.getElementById('submitButton').addEventListener('click', function() {
+            const domain = document.getElementById('domainSelect').value;
             const accessToken = document.getElementById('accessTokenInput').value;
 
-            fetchUserName(accessToken);
+            if (domain && accessToken) {
+                fetchUserDetails(domain, accessToken);
+            } else {
+                alert("Please select a domain and enter the API key.");
+            }
         });
 
-        function fetchUserName(accessToken) {
-            fetch('https://stake.com/_api/graphql', {
+        function fetchUserDetails(domain, accessToken) {
+            fetch(`https://${domain}/_api/graphql`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'x-access-token': accessToken
+                    "access-control-allow-origin": "*",
+                    "content-type": "application/json",
+                    "sec-ch-ua": "\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127.0.0.0\"",
+                    "sec-ch-ua-arch": "\"x86\"",
+                    "sec-ch-ua-bitness": "\"64\"",
+                    "sec-ch-ua-full-version": "\"127.0.6533.120\"",
+                    "sec-ch-ua-full-version-list": "\"Not)A;Brand\";v=\"99.0.0.0\", \"Google Chrome\";v=\"127.0.6533.120\", \"Chromium\";v=\"127.0.6533.120\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-ch-ua-model": "\"\"",
+                    "sec-ch-ua-platform": "\"Windows\"",
+                    "sec-ch-ua-platform-version": "\"15.0.0\"",
+                    'x-access-token': accessToken,
+                    'x-language': 'tr',
+                    'x-operation-name': 'UserKycInfo',
+                    'x-operation-type': 'query'
                 },
+                referrer: `https://${domain}/settings/general`,
+                referrerPolicy: "strict-origin-when-cross-origin",
                 body: JSON.stringify({
-                    "query": "query UserDetails {\n  user {\n    ...UserTags\n    createdAt\n    statisticScoped {\n      bets\n      wins\n      losses\n      ties\n      betAmount\n      currency\n      scope\n      betValue\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment UserTags on User {\n  id\n  name\n  isMuted\n  isRainproof\n  isIgnored\n  isHighroller\n  isSportHighroller\n  leaderboardDailyProfitRank\n  leaderboardDailyWageredRank\n  leaderboardWeeklyProfitRank\n  leaderboardWeeklyWageredRank\n  flags {\n    flag\n    rank\n    createdAt\n    __typename\n  }\n  roles {\n    name\n    expireAt\n    message\n    __typename\n  }\n  createdAt\n  preferenceHideBets\n  __typename\n}\n",
-                    "operationName": "UserDetails"
+                    "query": "query UserKycInfo {\n isDiscontinuedBlocked\n user {\n id\n roles {\n name\n }\n optionalFeatures\n kycStatus\n dob\n createdAt\n hasEmailVerified\n phoneNumber\n phoneCountryCode\n hasPhoneNumberVerified\n email\n registeredWithVpn\n isBanned\n isSuspended\n isSuspendedSportsbook\n nationalId {\n nationalId\n expireDate\n issueDate\n }\n transactionEligibilityState {\n fiat {\n currency\n depositEnabled\n withdrawalEnabled\n }\n crypto {\n depositEnabled\n withdrawalEnabled\n }\n useLegacyLogic\n }\n }\n}\n",
+                    "variables": {}
                 })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                if (!data.data || !data.data.user) {
-                    throw new Error("Could not retrieve user information.");
+                let alertMessages = [];
+                if (data && data.data && data.data.user) {
+                    const user = data.data.user;
+
+                    if (user.optionalFeatures) {
+                        if (!user.optionalFeatures.includes("bonusDrop")) {
+                            alertMessages.push("⚠️ You are banned from claiming drops.");
+                        }
+                        if (!user.optionalFeatures.includes("rain")) {
+                            alertMessages.push("⚠️ You are banned from getting rain.");
+                        }
+                        if (!user.optionalFeatures.includes("tip")) {
+                            alertMessages.push("⚠️ You are banned from tipping others.");
+                        }
+                    }
+
+                    if (user.isSuspendedSportsbook) {
+                        alertMessages.push("⚠️ You are suspended from sports bets.");
+                    }
+
+                    if (alertMessages.length > 0) {
+                        alert(alertMessages.join("\n"));
+                    } else {
+                        alert("No restrictions found.");
+                    }
+                } else {
+                    console.log('No user data found.');
+                    alert('No user data found.');
                 }
-                displayUserName(data);
             })
             .catch(error => {
-                console.error('Error fetching user details:', error);
-                const resultDiv = document.getElementById('result');
-                resultDiv.innerHTML = `<pre>Error: ${error.message}</pre>`;
+                console.error('GraphQL Request Failed:', error);
+                alert('GraphQL Request Failed.');
             });
-        }
-
-        function displayUserName(data) {
-            let rainAbuserInfo = "User is not banned from rain.";
-            const roles = data.data.user.roles;
-
-            for (let i = 0; i < roles.length; i++) {
-                if (roles[i].name === "rainAbuser") {
-                    rainAbuserInfo = `Role: RainAbuser\nExpiration Date: ${roles[i].expireAt}`;
-                    break;
-                }
-            }
-
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `<pre>Username: ${data.data.user.name}\n${rainAbuserInfo}</pre>`;
         }
     </script>
 </body>
